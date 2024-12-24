@@ -4,7 +4,7 @@ A simple and efficient currency converter application that allows users to conve
 
 ## Features
 
-- Convert between multiple currencies.
+- Convert between rupees and dollars.
 - Real-time exchange rates from a reliable API.
 - User-friendly interface.
 - Lightweight and fast.
