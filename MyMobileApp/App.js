@@ -1,8 +1,32 @@
-import React from 'react';
+import React ,{ useState, useEffect }from 'react';
 import { SafeAreaView, View, Text, TextInput, StyleSheet } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 
 const App = () => {
+  const [currencies, setCurrencies] = useState([]);
+
+  useEffect(() => {
+    fetchExchangeRates();
+  }, []);
+
+  const fetchExchangeRates = async () => {
+    try {
+      const response = await fetch('https://open.er-api.com/v6/latest/USD');
+      const data = await response.json();
+      if (data.result === 'success') {
+        const currencyList = Object.keys(data.rates).map((currency) => ({
+          label: currency,
+          value: currency,
+        }));
+        setCurrencies(currencyList);
+      } else {
+        alert('Failed to fetch currency data');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error fetching currency data.');
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Currency Converter</Text>
@@ -18,12 +42,16 @@ const App = () => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>From Currency</Text>
-        <RNPickerSelect placeholder={{ label: 'Select currency', value: null }} />
+        <RNPickerSelect  onValueChange={(value) => console.log(value)}
+          items={currencies}
+          placeholder={{ label: 'Select currency', value: null }} />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>To Currency</Text>
-        <RNPickerSelect placeholder={{ label: 'Select currency', value: null }} />
+        <RNPickerSelect  onValueChange={(value) => console.log(value)}
+          items={currencies}
+          placeholder={{ label: 'Select currency', value: null }} />
       </View>
     </SafeAreaView>
   );
