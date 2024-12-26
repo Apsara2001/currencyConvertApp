@@ -1,5 +1,5 @@
 import React ,{ useState, useEffect }from 'react';
-import { SafeAreaView, View, Text, TextInput, StyleSheet } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, StyleSheet,TouchableOpacity,ActivityIndicator } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 
 const App = () => {
@@ -8,6 +8,8 @@ const App = () => {
   const [fromCurrency, setFromCurrency] = useState('');
   const [toCurrency, setToCurrency] = useState('');
   const [convertedAmount, setConvertedAmount] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     fetchExchangeRates();
   }, []);
@@ -35,7 +37,7 @@ const App = () => {
       alert('Please enter all fields');
       return;
     }
-  
+    setLoading(true);
     try {
       const response = await fetch(
         `https://open.er-api.com/v6/latest/${fromCurrency}`
@@ -52,6 +54,8 @@ const App = () => {
     } catch (error) {
       console.error(error);
       alert('Error during conversion.');
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -64,19 +68,21 @@ const App = () => {
           style={styles.input}
           keyboardType="numeric"
           placeholder="Enter amount"
+          value={amount}
+          onChangeText={(text) => setAmount(text)}
         />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>From Currency</Text>
-        <RNPickerSelect  onValueChange={(value) => console.log(value)}
+        <RNPickerSelect  onValueChange={(value) =>setFromCurrency(value)}
           items={currencies}
           placeholder={{ label: 'Select currency', value: null }} />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>To Currency</Text>
-        <RNPickerSelect  onValueChange={(value) => console.log(value)}
+        <RNPickerSelect  onValueChange={(value) =>setToCurrency(value)}
           items={currencies}
           placeholder={{ label: 'Select currency', value: null }} />
       </View>
@@ -84,12 +90,12 @@ const App = () => {
       <TouchableOpacity style={styles.button} onPress={convertCurrency}>
         <Text style={styles.buttonText}>Convert</Text>
       </TouchableOpacity>;
-
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {convertedAmount && (
         <Text style={styles.result}>
           Converted Amount: {convertedAmount} {toCurrency}
         </Text>
-      )};
+      )}
     </SafeAreaView>
   );
 };
