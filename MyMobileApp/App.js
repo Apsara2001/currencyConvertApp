@@ -4,7 +4,10 @@ import RNPickerSelect from 'react-native-picker-select';
 
 const App = () => {
   const [currencies, setCurrencies] = useState([]);
-
+  const [amount, setAmount] = useState('');
+  const [fromCurrency, setFromCurrency] = useState('');
+  const [toCurrency, setToCurrency] = useState('');
+  const [convertedAmount, setConvertedAmount] = useState(null);
   useEffect(() => {
     fetchExchangeRates();
   }, []);
@@ -25,6 +28,30 @@ const App = () => {
     } catch (error) {
       console.error(error);
       alert('Error fetching currency data.');
+    }
+  };
+  const convertCurrency = async () => {
+    if (!amount || !fromCurrency || !toCurrency) {
+      alert('Please enter all fields');
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `https://open.er-api.com/v6/latest/${fromCurrency}`
+      );
+      const data = await response.json();
+  
+      if (data.result === 'success') {
+        const rate = data.rates[toCurrency];
+        const result = (amount * rate).toFixed(2);
+        setConvertedAmount(result);
+      } else {
+        alert('Failed to convert currency');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error during conversion.');
     }
   };
   return (
@@ -53,6 +80,16 @@ const App = () => {
           items={currencies}
           placeholder={{ label: 'Select currency', value: null }} />
       </View>
+      // Add a button and display result in the return block
+      <TouchableOpacity style={styles.button} onPress={convertCurrency}>
+        <Text style={styles.buttonText}>Convert</Text>
+      </TouchableOpacity>;
+
+      {convertedAmount && (
+        <Text style={styles.result}>
+          Converted Amount: {convertedAmount} {toCurrency}
+        </Text>
+      )};
     </SafeAreaView>
   );
 };
